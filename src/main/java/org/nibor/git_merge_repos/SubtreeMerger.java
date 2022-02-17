@@ -11,9 +11,6 @@ import java.util.Map;
 import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.dircache.DirCacheBuilder;
 import org.eclipse.jgit.dircache.DirCacheEntry;
-import org.eclipse.jgit.errors.CorruptObjectException;
-import org.eclipse.jgit.errors.IncorrectObjectTypeException;
-import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.lib.CommitBuilder;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectInserter;
@@ -128,6 +125,9 @@ public class SubtreeMerger {
 							+ "We can only merge non-overlapping trees, "
 							+ "so make sure the repositories have been prepared for that. "
 							+ "One possible way is to process each repository to move the root to a subdirectory first.\n"
+							+ "Current repository: " + repository.getDirectory().getName() + "\n"
+							+ "Existing entry: " + result.getEntryPathString() + "\n"
+							+ "Next     entry: " + it.getEntryPathString() + "\n"
 							+ "Current commit:\n" + commitMessage;
 					throw new IllegalStateException(msg);
 				} else {
