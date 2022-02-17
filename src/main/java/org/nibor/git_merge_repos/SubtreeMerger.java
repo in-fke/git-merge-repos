@@ -126,8 +126,10 @@ public class SubtreeMerger {
 							+ "so make sure the repositories have been prepared for that. "
 							+ "One possible way is to process each repository to move the root to a subdirectory first.\n"
 							+ "Current repository: " + repository.getDirectory().getName() + "\n"
-							+ "Existing entry: " + result.getEntryPathString() + "\n"
-							+ "Next     entry: " + it.getEntryPathString() + "\n"
+							+ "Existing entry (" + result.getClass().getSimpleName() + "): "
+							+ result.getEntryPathString() + "\n"
+							+ "Next entry (" + it.getClass().getSimpleName() + "): "
+							+ it.getEntryPathString() + "\n"
 							+ "Current commit:\n" + commitMessage;
 					throw new IllegalStateException(msg);
 				} else {

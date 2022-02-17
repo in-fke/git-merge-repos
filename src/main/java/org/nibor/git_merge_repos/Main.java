@@ -11,6 +11,8 @@ import java.util.regex.Pattern;
 
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.transport.URIish;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Main class for merging repositories via command-line.
@@ -18,6 +20,8 @@ import org.eclipse.jgit.transport.URIish;
 public class Main {
 
 	private static Pattern REPO_AND_DIR = Pattern.compile("(.*):([^:]+)");
+
+	private static Logger logger = LoggerFactory.getLogger(Main.class);
 
 	public static void main(String[] args) throws IOException, GitAPIException, URISyntaxException {
 		List<SubtreeConfig> subtreeConfigs = new ArrayList<>();
@@ -41,7 +45,7 @@ public class Main {
 
 		File outputDirectory = new File("merged-repo");
 		String outputPath = outputDirectory.getAbsolutePath();
-		System.out.println("Started merging " + subtreeConfigs.size()
+		logger.info("Started merging " + subtreeConfigs.size()
 				+ " repositories into one, output directory: " + outputPath);
 
 		long start = System.currentTimeMillis();
@@ -51,15 +55,15 @@ public class Main {
 
 		long timeMs = (end - start);
 		printIncompleteRefs(mergedRefs);
-		System.out.println("Done, took " + timeMs + " ms");
-		System.out.println("Merged repository: " + outputPath);
+		logger.info("Done, took " + timeMs + " ms");
+		logger.info("Merged repository: " + outputPath);
 
 	}
 
 	private static void printIncompleteRefs(List<MergedRef> mergedRefs) {
 		for (MergedRef mergedRef : mergedRefs) {
 			if (!mergedRef.getConfigsWithoutRef().isEmpty()) {
-				System.out.println(mergedRef.getRefType() + " '" + mergedRef.getRefName()
+				logger.warn(mergedRef.getRefType() + " '" + mergedRef.getRefName()
 						+ "' was not in: " + join(mergedRef.getConfigsWithoutRef()));
 			}
 		}
@@ -77,7 +81,7 @@ public class Main {
 	}
 
 	private static void exitInvalidUsage(String message) {
-		System.err.println(message);
+		logger.error(message);
 		System.exit(64);
 	}
 }

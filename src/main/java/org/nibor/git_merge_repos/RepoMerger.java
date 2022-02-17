@@ -30,12 +30,16 @@ import org.eclipse.jgit.revwalk.RevObject;
 import org.eclipse.jgit.revwalk.RevTag;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.transport.RefSpec;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Fetches original repos, merges original branches/tags of different repos and
  * creates branches/tags that point to new merge commits.
  */
 public class RepoMerger {
+
+	private static Logger logger = LoggerFactory.getLogger(RepoMerger.class);
 
 	private final List<SubtreeConfig> subtreeConfigs;
 	private final Repository repository;
@@ -64,14 +68,16 @@ public class RepoMerger {
 
 	private void fetch() throws GitAPIException {
 		for (SubtreeConfig config : subtreeConfigs) {
+			logger.info("fetch " + config.getRemoteName());
 			RefSpec branchesSpec = new RefSpec(
 					"refs/heads/*:refs/heads/original/"
 							+ config.getRemoteName() + "/*");
 			RefSpec tagsSpec = new RefSpec("refs/tags/*:refs/tags/original/"
 					+ config.getRemoteName() + "/*");
-			Git git = new Git(repository);
-			git.fetch().setRemote(config.getFetchUri().toPrivateString())
-					.setRefSpecs(branchesSpec, tagsSpec).call();
+			try (Git git = new Git(repository)) {
+				git.fetch().setRemote(config.getFetchUri().toPrivateString())
+						.setRefSpecs(branchesSpec, tagsSpec).call();
+			}
 		}
 	}
 
@@ -96,6 +102,7 @@ public class RepoMerger {
 	}
 
 	private void deleteOriginalRefs() throws IOException {
+		logger.info("delete original refs");
 		try (RevWalk revWalk = new RevWalk(repository)) {
 			Collection<Ref> refs = new ArrayList<>();
 			RefDatabase refDatabase = repository.getRefDatabase();
@@ -112,14 +119,18 @@ public class RepoMerger {
 	}
 
 	private void resetToBranch() throws IOException, GitAPIException {
+		logger.info("reset to branch");
 		Ref master = repository.getRef(Constants.R_HEADS + "master");
 		if (master != null) {
-			Git git = new Git(repository);
-			git.reset().setMode(ResetType.HARD).setRef(master.getName()).call();
+			try (Git git = new Git(repository)) {
+				git.reset().setMode(ResetType.HARD).setRef(master.getName()).call();
+			}
 		}
 	}
 
 	private MergedRef mergeBranch(String branch) throws IOException {
+
+		logger.info("merge branch " + branch);
 
 		Map<SubtreeConfig, ObjectId> resolvedRefs = resolveRefs(
 				"refs/heads/original/", branch);
@@ -148,6 +159,7 @@ public class RepoMerger {
 	}
 
 	private MergedRef mergeTag(String tagName) throws IOException {
+		logger.info("merge tag " + tagName);
 		Map<SubtreeConfig, ObjectId> resolvedRefs = resolveRefs(
 				"refs/tags/original/", tagName);
 
