@@ -12,6 +12,7 @@ public class MergedRef {
 	private final String refName;
 	private final Collection<SubtreeConfig> configsWithRef;
 	private final Collection<SubtreeConfig> configsWithoutRef;
+	private String message;
 
 	public MergedRef(String refType, String refName, Collection<SubtreeConfig> configsWithRef,
 			Collection<SubtreeConfig> configsWithoutRef) {
@@ -34,18 +35,20 @@ public class MergedRef {
 	}
 
 	public String getMessage() {
-		StringBuilder messageBuilder = new StringBuilder();
-		messageBuilder.append("Merge ").append(refType).append(" '").append(refName)
-				.append("' from multiple repositories");
-		messageBuilder.append("\n\n");
-		messageBuilder.append("Repositories:");
-		appendRepositoryNames(messageBuilder, configsWithRef);
-		if (!configsWithoutRef.isEmpty()) {
-			messageBuilder.append("\n\nRepositories without this ").append(refType).append(":");
-			appendRepositoryNames(messageBuilder, configsWithoutRef);
+		if (message == null) {
+			StringBuilder messageBuilder = new StringBuilder();
+			messageBuilder.append("Merge ").append(refType).append(" '").append(refName)
+					.append("' from multiple repositories");
+			messageBuilder.append("\n\n");
+			messageBuilder.append("Repositories:");
+			appendRepositoryNames(messageBuilder, configsWithRef);
+			if (!configsWithoutRef.isEmpty()) {
+				messageBuilder.append("\n\nRepositories without this ").append(refType).append(":");
+				appendRepositoryNames(messageBuilder, configsWithoutRef);
+			}
+			messageBuilder.append("\n");
+			message = messageBuilder.toString();
 		}
-		messageBuilder.append("\n");
-		String message = messageBuilder.toString();
 		return message;
 	}
 

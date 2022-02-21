@@ -143,7 +143,7 @@ public class RepoMerger {
 
 		MergedRef mergedRef = getMergedRef("branch", branch, parentCommits.keySet());
 
-		ObjectId mergeCommit = new SubtreeMerger(repository).createMergeCommit(parentCommits, mergedRef.getMessage());
+		ObjectId mergeCommit = new SubtreeMerger(repository).createMergeCommit(parentCommits, mergedRef);
 
 		RefUpdate refUpdate = repository.updateRef("refs/heads/" + branch);
 		refUpdate.setNewObjectId(mergeCommit);
@@ -204,7 +204,7 @@ public class RepoMerger {
 		}
 
 		MergedRef mergedRef = getMergedRef("tag", tagName, parentCommits.keySet());
-		ObjectId mergeCommit = new SubtreeMerger(repository).createMergeCommit(parentCommits, mergedRef.getMessage());
+		ObjectId mergeCommit = new SubtreeMerger(repository).createMergeCommit(parentCommits, mergedRef);
 
 		ObjectId objectToReference;
 		if (referenceTag != null) {
