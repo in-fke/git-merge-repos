@@ -21,6 +21,8 @@ import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.util.RawParseUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Merges the passed commit trees into one tree, adjusting directory structure
@@ -28,6 +30,8 @@ import org.eclipse.jgit.util.RawParseUtils;
  */
 public class SubtreeMerger {
 
+	private static Logger logger = LoggerFactory.getLogger(SubtreeMerger.class);
+	
 	private final Repository repository;
 
 	public SubtreeMerger(Repository repository) {
@@ -91,6 +95,12 @@ public class SubtreeMerger {
 				entry.setObjectId(iterator.getEntryObjectId());
 				builder.add(entry);
 			}
+			if (overlaps.size() > 0) {
+				for (String msg : overlaps) {
+					logger.error(msg);
+				}
+				throw new IllegalStateException();
+			}
 			builder.finish();
 			return builder.getDirCache();
 		}
@@ -112,6 +122,8 @@ public class SubtreeMerger {
 		}
 	}
 
+	private Collection<String> overlaps = new ArrayList<>();
+
 	private AbstractTreeIterator getSingleTreeIterator(TreeWalk treeWalk, String commitMessage) {
 		AbstractTreeIterator result = null;
 		int treeCount = treeWalk.getTreeCount();
@@ -125,13 +137,13 @@ public class SubtreeMerger {
 							+ "We can only merge non-overlapping trees, "
 							+ "so make sure the repositories have been prepared for that. "
 							+ "One possible way is to process each repository to move the root to a subdirectory first.\n"
-							+ "Current repository: " + repository.getDirectory().getName() + "\n"
 							+ "Existing entry (" + result.getClass().getSimpleName() + "): "
 							+ result.getEntryPathString() + "\n"
 							+ "Next entry (" + it.getClass().getSimpleName() + "): "
 							+ it.getEntryPathString() + "\n"
 							+ "Current commit:\n" + commitMessage;
-					throw new IllegalStateException(msg);
+					// throw new IllegalStateException(msg);
+					overlaps.add(msg);
 				} else {
 					result = it;
 				}
