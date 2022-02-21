@@ -7,5 +7,5 @@ SCRIPT_PATH="$( cd "$(dirname "$0")" ; pwd -P )"
 (
 cd "$SCRIPT_PATH" && \
 mvn clean install && \
-java -Xmx512m -cp '$SCRIPT_PATH/lib/*' org.nibor.git_merge_repos.Main "$@"
+java -Xmx512m -cp "$SCRIPT_PATH/target/classes:$SCRIPT_PATH/lib/*" org.nibor.git_merge_repos.Main "$@"
 )
